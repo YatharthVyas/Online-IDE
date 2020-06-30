@@ -34,7 +34,7 @@ app.register_blueprint(post)
 @jwt_optional
 def homepage():
     if get_jwt_identity():
-        return redirect('/dashboard')
+        return render_template('homepage.html', logged_in=True)
     else:
         return render_template('homepage.html')
 
@@ -84,7 +84,12 @@ def dashboard():
                 posts.append(p)
     posts = posts[:MAX_POSTS_DASHBOARD]
     random.shuffle(posts)
-    return render_template('dashboard.html', logged_in=True, posts=posts)
+    items = []
+    x = Post.objects(originalPostBy=get_jwt_identity())
+    for post in x:
+        item = post.to_mongo()
+        items.append(item)
+    return render_template('dashboard.html', logged_in=True, posts=posts, user=user, items=items)
 
 
 @app.route('/challenge')
